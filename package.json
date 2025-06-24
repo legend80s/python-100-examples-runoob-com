@@ -1,0 +1,15 @@
+{
+  "name": "python-100-examples-runoob-com",
+  "version": "1.0.0",
+  "description": "- 运行 js: `❯ bun test example1/permute.test.js`\r - 运行 python: `❯ uv run example1/permute.py`",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.4"
+  }
+}
