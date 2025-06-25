@@ -137,6 +137,44 @@ def answer(i: float) -> float:
     return r
 
 
+def answer_tuple(i: float) -> float:
+    arr = [
+        (1000000, 0.01),
+        (600000, 0.015),
+        (400000, 0.03),
+        (200000, 0.05),
+        (100000, 0.075),
+        (0, 0.1),
+    ]
+    r = 0
+    for idx in range(0, 6):
+        threshold, rate = arr[idx]
+        if i > threshold:
+            r += (i - threshold) * rate
+            i = threshold
+    return r
+
+
+def answer_tuple_2(profit: float) -> float:
+    arr = [
+        (1000000, 0.01),
+        (600000, 0.015),
+        (400000, 0.03),
+        (200000, 0.05),
+        (100000, 0.075),
+        (0, 0.1),
+    ]
+
+    bonus = 0
+
+    for threshold, rate in arr:
+        if profit > threshold:
+            bonus += (profit - threshold) * rate
+            profit = threshold
+
+    return bonus
+
+
 def italic(text):
     return f"\033[3m{text}\033[0m"
 
@@ -165,6 +203,7 @@ if __name__ == "__main__":
         # ("1200000", 43500.00),
         (50000, 5000),
         (100000, 10000),
+        (140000, 13000),
         (150000, 13750),
         (250000, 20000),
         (450000, 29000),
@@ -191,6 +230,22 @@ if __name__ == "__main__":
         assert actual == bonus, f"标准答案2：{actual=}, expected={bonus} when {profit=}"
     else:
         print("标准答案 2 正确")
+
+    for profit, bonus in cases:
+        actual = answer_tuple(profit)
+        assert actual == bonus, (
+            f"标准答案 3：{actual=}, expected={bonus} when {profit=}"
+        )
+    else:
+        print("标准答案 3 正确")
+
+    for profit, bonus in cases:
+        actual = answer_tuple_2(profit)
+        assert actual == bonus, (
+            f"标准答案 4：{actual=}, expected={bonus} when {profit=}"
+        )
+    else:
+        print("标准答案 4 正确")
 
     for profit, bonus in cases:
         actual = calculate_bonus_switch_case_1(profit)

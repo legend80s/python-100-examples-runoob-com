@@ -21,6 +21,8 @@ Requirements:
 
 (2) Use the switch statement to program.
 
-```Python
+## References
 
-```
+- <https://programmerall.com/article/4137320080/>
+- <https://www.runoob.com/python/python-exercise-example2.html>
+- <https://www.chegg.com/homework-help/questions-and-answers/-13-bonus-issued-enterprise-comes-profit-commission-profit-less-equal-100-000-yuan-10-comm-q106498812>
