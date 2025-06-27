@@ -10,19 +10,19 @@ from bs4 import BeautifulSoup
 def main():
     index = get_example_index()
 
-    print(f"{index=}")
+    # print(f"{index=}")
 
     info = fetch_example_info(index)
 
-    print(info)
+    # print(info)
 
-    # create_files(info)
+    create_files(info)
 
     readme = gen_readme(info)
 
-    print(readme)
+    # print(readme)
 
-    # write_readme(index, readme)
+    write_readme(index, readme)
 
 
 def check_index(index: str) -> int:
@@ -96,7 +96,7 @@ def gen_readme(info: ExampleInfo) -> str:
     url = info.url
 
     readme = f"""
-# Python Example#{index}
+# Python Example #{index}
 
 > {title}
 
@@ -119,14 +119,16 @@ def gen_readme(info: ExampleInfo) -> str:
 
 
 def write_readme(index: int, readme: str) -> None:
-    with open(f"./example{index}/README.md", "w") as f:
+    with open(f"./example{index}/README.md", "w", encoding="utf-8") as f:
         f.write(readme)
 
 
 def create_files(info: ExampleInfo) -> None:
     index = info.index
 
-    cmd = f"mkdir example${index} && touch example${index}/README.md && touch example${index}/{index}.py"
+    folder = f"example{index}"
+
+    cmd = f"mkdir {folder} && touch {folder}/README.md && touch {folder}/{index}.py"
     subprocess.run(cmd, shell=True, check=True)
 
 
