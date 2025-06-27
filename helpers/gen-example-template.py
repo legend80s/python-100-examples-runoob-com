@@ -143,7 +143,7 @@ def create_files(info: ExampleInfo) -> None:
             text=True,
         )
     except subprocess.CalledProcessError as err:
-        print(err.stderr)
+        print(err.stderr.strip())
         sys.exit(err.returncode)
 
 
