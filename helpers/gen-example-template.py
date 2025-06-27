@@ -129,7 +129,22 @@ def create_files(info: ExampleInfo) -> None:
     folder = f"example{index}"
 
     cmd = f"mkdir {folder} && touch {folder}/README.md && touch {folder}/{index}.py"
-    subprocess.run(cmd, shell=True, check=True)
+
+    try:
+        subprocess.run(
+            cmd,
+            # 运行多条命令
+            shell=True,
+            # 命令失败 raise
+            check=True,
+            # 报错的时候能通过 stderr 输出自己想要的内容
+            capture_output=True,
+            # 输出为解码后文本而非编码，否则自己解码各平台不一样（Linux utf-8，Windows gbk）会多很多代码
+            text=True,
+        )
+    except subprocess.CalledProcessError as err:
+        print(err.stderr)
+        sys.exit(err.returncode)
 
 
 if __name__ == "__main__":
