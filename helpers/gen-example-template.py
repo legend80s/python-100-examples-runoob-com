@@ -1,28 +1,37 @@
 import subprocess
 import sys
 from dataclasses import dataclass
-from typing import cast
+from typing import NamedTuple, cast
 
 import requests
 from bs4 import BeautifulSoup
 
+NO_VSCODE_FLAGS = {"--no-open-vscode", "--nvsc"}
+
 
 def main():
-    index = get_example_index()
-
-    # print(f"{index=}")
+    index, open_in_vscode, dry_run = parse_args()
 
     info = fetch_example_info(index)
 
-    # print(info)
+    dry_run and print(info)  # type: ignore
 
-    create_files(info)
+    created = create_files(info, dry_run)
+    dry_run and print(f"{created=}")  # type: ignore
 
     readme = gen_readme(info)
+    dry_run and print(readme)  # type: ignore
 
-    # print(readme)
+    print(f"write README to {created.readme}") if dry_run else write_readme(
+        readme, readme_file_path=created.readme
+    )
 
-    write_readme(index, readme)
+    if open_in_vscode:
+        cmd = f"code {created.readme}"
+        if dry_run:
+            print(f"$ {cmd}")
+        else:
+            subprocess.run(cmd)
 
 
 def check_index(index: str) -> int:
@@ -39,11 +48,26 @@ def check_index(index: str) -> int:
         sys.exit(1)
 
 
-def get_example_index() -> int:
-    if len(sys.argv) > 1:
-        return check_index(sys.argv[1])
+class Parsed(NamedTuple):
+    example_index: int
+    open_in_vscode: bool
+    dry_run: bool
+
+
+def parse_args() -> Parsed:
+    index = -1
+
+    argv = sys.argv
+
+    if len(argv) > 1:
+        index = check_index(argv[1])
     else:
-        return check_index(input("请输入 Example 序号: "))
+        index = check_index(input("请输入 Example 序号: "))
+
+    open_in_vscode = any(arg in NO_VSCODE_FLAGS for arg in argv)
+    dry_run = "--dry-run" in argv
+
+    return Parsed(index, open_in_vscode, dry_run=dry_run)
 
 
 @dataclass
@@ -118,17 +142,31 @@ def gen_readme(info: ExampleInfo) -> str:
     return readme
 
 
-def write_readme(index: int, readme: str) -> None:
-    with open(f"./example{index}/README.md", "w", encoding="utf-8") as f:
+def write_readme(readme: str, readme_file_path: str) -> None:
+    with open(readme_file_path, "w", encoding="utf-8") as f:
         f.write(readme)
 
 
-def create_files(info: ExampleInfo) -> None:
+class FilesAndFolders(NamedTuple):
+    folder: str
+    readme: str
+    python: str
+
+
+def create_files(info: ExampleInfo, dry_run: bool) -> FilesAndFolders:
     index = info.index
 
     folder = f"example{index}"
+    readme = f"{folder}/README.md"
+    python = f"{folder}/{index}.py"
 
-    cmd = f"mkdir {folder} && touch {folder}/README.md && touch {folder}/{index}.py"
+    cmd = f"mkdir {folder} && touch {readme} && touch {python}"
+
+    result = FilesAndFolders(folder=folder, readme=readme, python=python)
+
+    if dry_run:
+        print(f"$ {cmd}")
+        return result
 
     try:
         subprocess.run(
@@ -145,6 +183,8 @@ def create_files(info: ExampleInfo) -> None:
     except subprocess.CalledProcessError as err:
         print(cast(str, err.stderr).strip())
         sys.exit(err.returncode)
+
+    return result
 
 
 if __name__ == "__main__":
