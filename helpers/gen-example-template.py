@@ -3,6 +3,7 @@ import sys
 import shutil
 
 from dataclasses import dataclass
+from my_timeit import timeit
 from typing import NamedTuple, cast
 
 import requests
@@ -203,4 +204,5 @@ def open_in_vscode(dry_run: bool, files: CreatedFilesAndFolders) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    with timeit(main.__name__):
+        main()
