@@ -1,8 +1,8 @@
-from dataclasses import dataclass
-import os
 import subprocess
 import sys
-from typing import Final, TypeAlias, TypedDict
+from dataclasses import dataclass
+from typing import cast
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -143,7 +143,7 @@ def create_files(info: ExampleInfo) -> None:
             text=True,
         )
     except subprocess.CalledProcessError as err:
-        print(err.stderr.strip())
+        print(cast(str, err.stderr).strip())
         sys.exit(err.returncode)
 
 
