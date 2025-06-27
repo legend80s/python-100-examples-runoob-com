@@ -10,7 +10,7 @@ NO_VSCODE_FLAGS = {"--no-open-vscode", "--nvsc"}
 
 
 def main():
-    index, open_in_vscode, dry_run = parse_args()
+    index, no_open_in_vscode, dry_run = parse_args()
 
     info = fetch_example_info(index)
 
@@ -26,7 +26,9 @@ def main():
         readme, readme_file_path=created.readme
     )
 
-    if open_in_vscode:
+    if no_open_in_vscode:
+        pass
+    else:
         cmd = f"code {created.readme}"
         if dry_run:
             print(f"$ {cmd}")
@@ -50,7 +52,7 @@ def check_index(index: str) -> int:
 
 class Parsed(NamedTuple):
     example_index: int
-    open_in_vscode: bool
+    no_open_in_vscode: bool
     dry_run: bool
 
 
@@ -64,10 +66,10 @@ def parse_args() -> Parsed:
     else:
         index = check_index(input("请输入 Example 序号: "))
 
-    open_in_vscode = any(arg in NO_VSCODE_FLAGS for arg in argv)
+    no_open_in_vscode = any(arg in NO_VSCODE_FLAGS for arg in argv)
     dry_run = "--dry-run" in argv
 
-    return Parsed(index, open_in_vscode, dry_run=dry_run)
+    return Parsed(index, no_open_in_vscode=no_open_in_vscode, dry_run=dry_run)
 
 
 @dataclass
