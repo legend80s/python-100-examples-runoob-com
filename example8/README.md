@@ -1,4 +1,4 @@
-# Nine times Nine Table
+# Nine Times Nine Table
 
 题目：输出 9*9 乘法口诀表。
 
