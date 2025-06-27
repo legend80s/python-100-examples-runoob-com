@@ -1,5 +1,7 @@
 import subprocess
 import sys
+import shutil
+
 from dataclasses import dataclass
 from typing import NamedTuple, cast
 
@@ -9,7 +11,7 @@ from bs4 import BeautifulSoup
 NO_VSCODE_FLAGS = {"--no-open-vscode", "--nvsc"}
 
 
-def main():
+def main() -> None:
     index, no_open_in_vscode, dry_run = parse_args()
 
     info = fetch_example_info(index)
@@ -29,11 +31,7 @@ def main():
     if no_open_in_vscode:
         pass
     else:
-        cmd = f"code {created.readme}"
-        if dry_run:
-            print(f"$ {cmd}")
-        else:
-            subprocess.run(cmd)
+        open_in_vscode(dry_run, created)
 
 
 def check_index(index: str) -> int:
@@ -149,13 +147,13 @@ def write_readme(readme: str, readme_file_path: str) -> None:
         f.write(readme)
 
 
-class FilesAndFolders(NamedTuple):
+class CreatedFilesAndFolders(NamedTuple):
     folder: str
     readme: str
     python: str
 
 
-def create_files(info: ExampleInfo, dry_run: bool) -> FilesAndFolders:
+def create_files(info: ExampleInfo, dry_run: bool) -> CreatedFilesAndFolders:
     index = info.index
 
     folder = f"example{index}"
@@ -164,7 +162,7 @@ def create_files(info: ExampleInfo, dry_run: bool) -> FilesAndFolders:
 
     cmd = f"mkdir {folder} && touch {readme} && touch {python}"
 
-    result = FilesAndFolders(folder=folder, readme=readme, python=python)
+    result = CreatedFilesAndFolders(folder=folder, readme=readme, python=python)
 
     if dry_run:
         print(f"$ {cmd}")
@@ -187,6 +185,21 @@ def create_files(info: ExampleInfo, dry_run: bool) -> FilesAndFolders:
         sys.exit(err.returncode)
 
     return result
+
+
+def open_in_vscode(dry_run: bool, files: CreatedFilesAndFolders) -> None:
+    vscode_cmd = shutil.which("code") or shutil.which("code.cmd")
+
+    if not vscode_cmd:
+        print("VS Code 未安装或未添加到 PATH")
+        return
+
+    cmd = f"{vscode_cmd} {files.readme}"
+
+    if dry_run:
+        print(f"$ {cmd}")
+    else:
+        subprocess.run(cmd)
 
 
 if __name__ == "__main__":
