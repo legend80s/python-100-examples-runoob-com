@@ -1,6 +1,6 @@
 import time
 from contextlib import contextmanager
-from typing import Any, Callable, NamedTuple, TypeAlias
+from typing import Callable, NamedTuple, TypeAlias
 
 
 class LabelFactoryParams(NamedTuple):
@@ -44,9 +44,9 @@ def timeit(label: str | FuncWithZeroInputParams | Callable[[LabelFactoryParams],
             params_count = len(inspect.signature(label).parameters)
 
             if params_count == 0:
-                return make_label(label())
+                return make_label(label())  # type: ignore
 
-            return label(LabelFactoryParams(start_time, end_time))
+            return label(LabelFactoryParams(start_time, end_time))  # type: ignore
 
     try:
         yield
