@@ -1,3 +1,4 @@
+import re
 import subprocess
 import sys
 import shutil
@@ -42,18 +43,28 @@ def init(parsed: Parsed) -> None:
             open_in_vscode(dry_run, created)
 
 
-def check_index(index: str) -> int:
+def input_indices() -> list[int]:
     try:
-        flt = float(index)
-        if flt.is_integer() and flt > 0:
-            pass
-        else:
-            raise ValueError("必须是大于 0 的整数")
+        input_str = input("请输入 Example 序号（多个则以空格隔开）: ")
+    except KeyboardInterrupt:
+        sys.exit(0)
 
-        return int(flt)
+    try:
+        return [check_index(str_index) for str_index in re.split(r"\s+", input_str)]
     except ValueError:
-        print("请输入一个**正整数**")
-        sys.exit(1)
+        print("请输入**正整数**，Ctr + C 退出。")
+
+        return input_indices()
+
+
+def check_index(index: str) -> int:
+    flt = float(index)
+    if flt.is_integer() and flt > 0:
+        pass
+    else:
+        raise ValueError("必须是大于 0 的整数")
+
+    return int(flt)
 
 
 def parse_args() -> Parsed:
@@ -65,8 +76,7 @@ def parse_args() -> Parsed:
     ]
 
     if len(indices) == 0:
-        index = check_index(input("请输入 Example 序号: "))
-        indices = [index]
+        indices = input_indices()
 
     no_open_in_vscode = any(arg in NO_VSCODE_FLAGS for arg in argv)
     dry_run = "--dry-run" in argv
@@ -211,10 +221,9 @@ def open_in_vscode(dry_run: bool, files: CreatedFilesAndFolders) -> None:
 
 
 def main():
-    parsed: Parsed
+    parsed = parse_args()
 
     with timeit(lambda: f"Example #{','.join(map(str, parsed.example_indices))}"):
-        parsed = parse_args()
         init(parsed)
 
 
