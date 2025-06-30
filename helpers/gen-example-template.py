@@ -13,31 +13,33 @@ NO_VSCODE_FLAGS = {"--no-open-vscode", "--nvsc"}
 
 
 class Parsed(NamedTuple):
-    example_index: int
+    example_indices: list[int]
     no_open_in_vscode: bool
     dry_run: bool
 
 
 def init(parsed: Parsed) -> None:
-    index, no_open_in_vscode, dry_run = parsed
-    info = fetch_example_info(index)
+    indices, no_open_in_vscode, dry_run = parsed
 
-    dry_run and print(info)  # type: ignore
+    for index in indices:
+        info = fetch_example_info(index)
 
-    created = create_files(info, dry_run)
-    dry_run and print(f"{created=}")  # type: ignore
+        dry_run and print(info)  # type: ignore
 
-    readme = gen_readme(info)
-    dry_run and print(readme)  # type: ignore
+        created = create_files(info, dry_run)
+        dry_run and print(f"{created=}")  # type: ignore
 
-    print(f"write README to {created.readme}") if dry_run else write_readme(
-        readme, readme_file_path=created.readme
-    )
+        readme = gen_readme(info)
+        dry_run and print(readme)  # type: ignore
 
-    if no_open_in_vscode:
-        pass
-    else:
-        open_in_vscode(dry_run, created)
+        print(f"write README to {created.readme}") if dry_run else write_readme(
+            readme, readme_file_path=created.readme
+        )
+
+        if no_open_in_vscode:
+            pass
+        else:
+            open_in_vscode(dry_run, created)
 
 
 def check_index(index: str) -> int:
@@ -55,19 +57,25 @@ def check_index(index: str) -> int:
 
 
 def parse_args() -> Parsed:
-    index = -1
-
     argv = sys.argv
+    # find all integers parse as index
 
-    if len(argv) > 1:
-        index = check_index(argv[1])
-    else:
+    indices: list[int] = [
+        intArg for arg in argv if arg.isdigit() and (intArg := int(arg)) > 0
+    ]
+
+    if len(indices) == 0:
         index = check_index(input("请输入 Example 序号: "))
+        indices = [index]
 
     no_open_in_vscode = any(arg in NO_VSCODE_FLAGS for arg in argv)
     dry_run = "--dry-run" in argv
 
-    return Parsed(index, no_open_in_vscode=no_open_in_vscode, dry_run=dry_run)
+    result = Parsed(indices, no_open_in_vscode=no_open_in_vscode, dry_run=dry_run)
+
+    dry_run and print(result)  # type: ignore
+
+    return result
 
 
 @dataclass
@@ -107,7 +115,7 @@ def fetch_example_info(index: int) -> ExampleInfo:
     info.hint = p2.text.strip()
 
     if pre := soup.css.select(selector.demo_result)[0]:  # type: ignore
-        info.demo_result = pre.text.strip()
+        info.demo_result = pre.text.rstrip()
 
     return info
 
@@ -137,7 +145,7 @@ def gen_readme(info: ExampleInfo) -> str:
 ## References
 
 - <{url}>
-""".strip()
+""".lstrip()
 
     return readme
 
@@ -205,7 +213,7 @@ def open_in_vscode(dry_run: bool, files: CreatedFilesAndFolders) -> None:
 def main():
     parsed: Parsed
 
-    with timeit(lambda: f"Example #{parsed.example_index}"):
+    with timeit(lambda: f"Example #{','.join(map(str, parsed.example_indices))}"):
         parsed = parse_args()
         init(parsed)
 
