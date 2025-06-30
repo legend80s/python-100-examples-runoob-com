@@ -12,9 +12,14 @@ from bs4 import BeautifulSoup
 NO_VSCODE_FLAGS = {"--no-open-vscode", "--nvsc"}
 
 
-def main() -> None:
-    index, no_open_in_vscode, dry_run = parse_args()
+class Parsed(NamedTuple):
+    example_index: int
+    no_open_in_vscode: bool
+    dry_run: bool
 
+
+def init(parsed: Parsed) -> None:
+    index, no_open_in_vscode, dry_run = parsed
     info = fetch_example_info(index)
 
     dry_run and print(info)  # type: ignore
@@ -47,12 +52,6 @@ def check_index(index: str) -> int:
     except ValueError:
         print("请输入一个**正整数**")
         sys.exit(1)
-
-
-class Parsed(NamedTuple):
-    example_index: int
-    no_open_in_vscode: bool
-    dry_run: bool
 
 
 def parse_args() -> Parsed:
@@ -203,6 +202,13 @@ def open_in_vscode(dry_run: bool, files: CreatedFilesAndFolders) -> None:
         subprocess.run(cmd)
 
 
+def main():
+    parsed: Parsed
+
+    with timeit(lambda: f"Example #{parsed.example_index}"):
+        parsed = parse_args()
+        init(parsed)
+
+
 if __name__ == "__main__":
-    with timeit(main.__name__):
-        main()
+    main()
