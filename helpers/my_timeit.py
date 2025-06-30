@@ -33,7 +33,7 @@ def timeit(label: str | FuncWithZeroInputParams | Callable[[LabelFactoryParams],
     start_time = time.perf_counter()
 
     def make_label(short_label: str) -> str:
-        return f"{short_label} 耗时: {(end_time - start_time):2f} 秒"
+        return f"{short_label} 耗时: {end_time - start_time:.2f} 秒"
 
     def gen_label() -> str:
         if isinstance(label, str):
