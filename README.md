@@ -6,6 +6,13 @@
 
 ```sh
 uv run helpers/gen-example-template.py 9
+
+# 多个
+uv run helpers/gen-example-template.py 9 10
+# 范围
+uv run helpers/gen-example-template.py 15-20
+# 仅运行不上传文件
+uv run helpers/gen-example-template.py 15-20 --dry-run
 ```
 
 - `--no-open-vscode`：默认生成后用 VSCode 打开 README，即执行命令 `code example9/README.md`，如果想禁止该行为，可加上 `--no-open-vscode` 或 `--nvsc`。

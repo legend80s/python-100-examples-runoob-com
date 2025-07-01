@@ -1,14 +1,13 @@
 import re
+import shutil
 import subprocess
 import sys
-import shutil
-
 from dataclasses import dataclass
-from my_timeit import timeit
 from typing import NamedTuple, cast
 
 import requests
 from bs4 import BeautifulSoup
+from my_timeit import timeit
 
 NO_VSCODE_FLAGS = {"--no-open-vscode", "--nvsc"}
 
@@ -70,16 +69,20 @@ def check_index(index: str) -> int:
 def parse_args() -> Parsed:
     argv = sys.argv
     # find all integers parse as index
+    dry_run = "--dry-run" in argv
 
     indices: list[int] = [
         intArg for arg in argv if arg.isdigit() and (intArg := int(arg)) > 0
     ]
 
     if len(indices) == 0:
-        indices = input_indices()
+        indices = to_list(find_range(argv))
+        dry_run and print(f"{indices=}")  # type: ignore
+
+        if len(indices) == 0:
+            indices = input_indices()
 
     no_open_in_vscode = any(arg in NO_VSCODE_FLAGS for arg in argv)
-    dry_run = "--dry-run" in argv
 
     result = Parsed(indices, no_open_in_vscode=no_open_in_vscode, dry_run=dry_run)
 
@@ -220,6 +223,24 @@ def open_in_vscode(dry_run: bool, files: CreatedFilesAndFolders) -> None:
         subprocess.run(cmd)
 
 
+class Range(NamedTuple):
+    start_inclusive: int
+    stop_inclusive: int
+
+
+def find_range(args: list[str]) -> None | Range:
+    for arg in args:
+        if result := re.match(r"(?P<start>\d+)\-(?P<stop>\d+)", arg):
+            return Range(
+                start_inclusive=int(result["start"]),
+                stop_inclusive=int(result["stop"]),
+            )
+
+
+def to_list(rng: None | Range) -> list[int]:
+    return list(range(rng.start_inclusive, rng.stop_inclusive + 1)) if rng else []
+
+
 def main():
     parsed = parse_args()
 
@@ -229,3 +250,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # arg = "15-20"
+    # result = re.match(r"(?P<start>\d+)\-(?P<stop>\d+)", arg)
+    # if result:
+    # print(result.groupdict())
+    #     print(result.groups())
+    #     print(result.group())
+    # args = ["helpers/gen-example-template.py", "15-20", "--dry-run"]
