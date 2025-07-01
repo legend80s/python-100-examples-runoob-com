@@ -229,12 +229,22 @@ class Range(NamedTuple):
 
 
 def find_range(args: list[str]) -> None | Range:
-    for arg in args:
-        if result := re.match(r"(?P<start>\d+)\-(?P<stop>\d+)", arg):
-            return Range(
-                start_inclusive=int(result["start"]),
-                stop_inclusive=int(result["stop"]),
-            )
+    matches = (
+        Range(int(result["start"]), int(result["stop"]))
+        for arg in args
+        if (result := re.match(r"(?P<start>\d+)\-(?P<stop>\d+)", arg))
+    )
+
+    # 只需要第一项即可，性能相差不大，因为即使有多个也只会匹配到第一个就结束
+    return next(matches, None)
+
+    # if + early-return
+    # for arg in args:
+    #     if result := re.match(r"(?P<start>\d+)\-(?P<stop>\d+)", arg):
+    #         return Range(
+    #             start_inclusive=int(result["start"]),
+    #             stop_inclusive=int(result["stop"]),
+    #         )
 
 
 def to_list(rng: None | Range) -> list[int]:
