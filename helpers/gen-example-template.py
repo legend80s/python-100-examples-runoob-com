@@ -244,7 +244,9 @@ def to_list(rng: None | Range) -> list[int]:
 def main():
     parsed = parse_args()
 
-    with timeit(lambda: f"Example #{','.join(map(str, parsed.example_indices))}"):
+    with timeit(
+        lambda: f"Example #{' '.join(map(lambda index: f'{index}✅', parsed.example_indices))}"
+    ):
         init(parsed)
 
 
