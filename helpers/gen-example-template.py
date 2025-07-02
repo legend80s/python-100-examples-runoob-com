@@ -128,7 +128,7 @@ def fetch_example_info(index: int) -> ExampleInfo:
     info.hint = p2.text.strip()
 
     if pre := soup.css.select(selector.demo_result)[0]:  # type: ignore
-        info.demo_result = pre.text.rstrip()
+        info.demo_result = cast(str, pre.text).strip("\r\n")
 
     return info
 

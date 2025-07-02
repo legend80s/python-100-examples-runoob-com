@@ -5,7 +5,6 @@
 ## Demo Result
 
 ```python
-
 n = 4
 a = 4
 4
