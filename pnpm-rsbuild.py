@@ -18,15 +18,19 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
 x = np.arange(len(scenarios))
 width = 0.35
 
+# 根据数值大小分配颜色：大(红) > 中(蓝) > 小(绿)
+colors_time1 = ["#FF8E8E", "#6E85D3", "#45D174"]  # 总耗时颜色
+colors_time2 = ["#FF6B6B", "#564ECD", "#B7E9A3"]  # 安装+构建耗时颜色
+
 bars1 = ax1.bar(
     x - width / 2,
     install_build_times,
     width,
     label="安装+构建耗时 (s)",
-    color="#FF9999",
+    color=colors_time1,
 )
 bars2 = ax1.bar(
-    x + width / 2, total_times, width, label="流水线总耗时 (s)", color="#66B2FF"
+    x + width / 2, total_times, width, label="流水线总耗时 (s)", color=colors_time2
 )
 
 ax1.set_xlabel("构建场景")
@@ -45,6 +49,7 @@ for bar in bars1:
         f"{height}s",
         ha="center",
         va="bottom",
+        fontweight="bold",
     )
 
 for bar in bars2:
@@ -55,10 +60,14 @@ for bar in bars2:
         f"{height}s",
         ha="center",
         va="bottom",
+        fontweight="bold",
     )
 
 # 右侧子图：占比对比柱状图
-bars3 = ax2.bar(scenarios, percentages, color="#99CC99")
+# 根据百分比大小分配颜色：大(红) > 中(蓝) > 小(绿)
+colors_percent = ["#4E50CD", "#FF6B6B", "#45D1A2"]  # 红->蓝->绿
+
+bars3 = ax2.bar(scenarios, percentages, width=0.3, color=colors_percent)
 ax2.set_xlabel("构建场景")
 ax2.set_ylabel("百分比 (%)")
 ax2.set_title("安装+构建耗时占比对比")
@@ -73,7 +82,12 @@ for bar in bars3:
         f"{height}%",
         ha="center",
         va="bottom",
+        fontweight="bold",
     )
+
+# 添加网格线使图表更易读
+ax1.grid(axis="y", alpha=0.3, linestyle="--")
+ax2.grid(axis="y", alpha=0.3, linestyle="--")
 
 # 美化图表
 plt.suptitle(
