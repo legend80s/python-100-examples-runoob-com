@@ -6,13 +6,13 @@ plt.rcParams["font.sans-serif"] = ["SimHei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
 
 # 数据准备
-scenarios = ["yarn + umi", "pnpm + rsbuild 第1次", "pnpm + rsbuild 第2次"]
+scenarios = ["yarn + umi", "pnpm + rsbuild\n第1次", "pnpm + rsbuild\n第2次"]
 install_build_times = [54, 29, 15]  # 安装+构建耗时(秒)
 total_times = [167, 63, 55]  # 流水线总耗时(秒)
 percentages = [32, 46, 27]  # 安装+构建耗时占比(%)
 
 # 创建图表
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 8))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
 
 # 左侧子图：时间对比
 x = np.arange(len(scenarios))
@@ -57,32 +57,28 @@ for bar in bars2:
         va="bottom",
     )
 
-# 右侧子图：占比对比
-colors = ["#FF9999", "#66B2FF", "#99FF99"]
-wedges, texts, autotexts = ax2.pie(
-    percentages, labels=scenarios, autopct="%1.0f%%", colors=colors, startangle=90
-)
+# 右侧子图：占比对比柱状图
+bars3 = ax2.bar(scenarios, percentages, color="#99CC99")
+ax2.set_xlabel("构建场景")
+ax2.set_ylabel("百分比 (%)")
 ax2.set_title("安装+构建耗时占比对比")
+ax2.set_ylim(0, 50)
+
+# 在柱状图上添加百分比标签
+for bar in bars3:
+    height = bar.get_height()
+    ax2.text(
+        bar.get_x() + bar.get_width() / 2.0,
+        height + 1,
+        f"{height}%",
+        ha="center",
+        va="bottom",
+    )
 
 # 美化图表
 plt.suptitle(
     "构建工具迁移性能对比: yarn+umi → pnpm+rsbuild", fontsize=16, fontweight="bold"
 )
 plt.tight_layout()
-
-# 添加统计信息
-improvement_text = f"""
-性能提升统计:
-- 安装+构建耗时减少: {(54 - 15) / 54 * 100:.1f}% (从54s降至15s)
-- 流水线总耗时减少: {(167 - 55) / 167 * 100:.1f}% (从167s降至55s)
-- 第二次构建比第一次更快: {(29 - 15) / 29 * 100:.1f}% (得益于pnpm缓存)
-"""
-plt.figtext(
-    0.1,
-    0.02,
-    improvement_text,
-    fontsize=12,
-    bbox=dict(boxstyle="round,pad=0.5", facecolor="lightgray"),
-)
 
 plt.show()
